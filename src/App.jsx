@@ -266,18 +266,25 @@ export default function App() {
 
     try {
       const url = import.meta.env.VITE_GOOGLE_SCRIPT_URL
+      console.log('[DEBUG] Submitting to:', url)
+      console.log('[DEBUG] Payload:', payload)
+
       const form = new FormData()
       for (const [key, value] of Object.entries(payload)) {
         form.append(key, value)
       }
-      await fetch(url, {
+
+      const res = await fetch(url, {
         method: 'POST',
         mode: 'no-cors',
         body: form,
       })
+      console.log('[DEBUG] Response status:', res.status, res.statusText)
+      console.log('[DEBUG] Response type (no-cors = opaque):', res.type)
 
       setSubmitted(true)
     } catch (err) {
+      console.error('[DEBUG] Submit error:', err)
       setSubmitError('提交失敗，請稍後再試。')
     } finally {
       setSubmitting(false)

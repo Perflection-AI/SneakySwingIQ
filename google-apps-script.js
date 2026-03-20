@@ -27,12 +27,18 @@ function doGet(e) {
 // Handle POST requests — write survey data to sheet
 function doPost(e) {
   try {
+    console.log('[DEBUG] Received parameters:', JSON.stringify(e.parameter))
+
     const sheetId = e.parameter.sheet || 'Sheet1'
+    console.log('[DEBUG] Target sheet:', sheetId)
+
     const ss = SpreadsheetApp.getActiveSpreadsheet()
     let sheet = ss.getSheetByName(sheetId)
+    console.log('[DEBUG] Sheet found:', !!sheet)
 
     // Create sheet with headers if it doesn't exist
     if (!sheet) {
+      console.log('[DEBUG] Creating new sheet:', sheetId)
       sheet = ss.insertSheet(sheetId)
       sheet.appendRow([
         'Timestamp',
@@ -56,7 +62,7 @@ function doPost(e) {
     const p = e.parameter
 
     // Append row
-    sheet.appendRow([
+    const row = [
       new Date().toISOString(),
       p.pricing_mode,
       p.pricing_tab,
@@ -68,12 +74,15 @@ function doPost(e) {
       p.acceptable_range_width,
       p.currency,
       p.survey_version,
-    ])
+    ]
+    sheet.appendRow(row)
+    console.log('[DEBUG] Row appended successfully. Current last row:', sheet.getLastRow())
 
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'ok' }))
       .setMimeType(ContentService.MimeType.JSON)
   } catch (err) {
+    console.error('[DEBUG] Error:', err.message, err.stack)
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
       .setMimeType(ContentService.MimeType.JSON)
