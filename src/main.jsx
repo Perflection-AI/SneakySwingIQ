@@ -12,6 +12,8 @@ posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
   capture_pageleave: true,
 })
 
+console.log(import.meta.env)
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App posthog={posthog} />
