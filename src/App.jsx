@@ -248,6 +248,7 @@ export default function App() {
     if (!validate()) return
 
     const payload = {
+      sheet: 'Sheet1',
       pricing_mode: modeId,
       pricing_tab:  tab.id,
       pricing_tab_name: tab.name,
