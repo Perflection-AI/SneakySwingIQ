@@ -267,8 +267,8 @@ export default function App() {
       const url = import.meta.env.VITE_GOOGLE_SCRIPT_URL
       await fetch(url, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload),
       })
 
