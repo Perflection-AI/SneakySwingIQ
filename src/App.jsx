@@ -193,12 +193,14 @@ const sliderBg = (val, min, max) => {
 }
 
 /* ─── Main component ──────────────────────────────────────────────────────── */
-export default function App({ posthog }) {
+export default function App() {
   const [modeId, setModeId]   = useState(null)
   const [tabIdx, setTabIdx]   = useState(0)
   const [answers, setAnswers] = useState({})
   const [errors, setErrors]   = useState({})
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
 
   const mode = MODES.find(m => m.id === modeId)
   const tab  = mode?.tabs[tabIdx]
@@ -242,39 +244,40 @@ export default function App({ posthog }) {
     return ok
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return
 
     const payload = {
-      // Segment
-      pricing_mode: modeId,              // 'subscription' | 'ppv'
-      pricing_tab:  tab.id,             // 'tier1' | 'tier2' | 'swing' | 'feedback'
+      pricing_mode: modeId,
+      pricing_tab:  tab.id,
       pricing_tab_name: tab.name,
-
-      // Van Westendorp prices (USD)
       price_too_cheap:    getA('tc'),
       price_best_value:   getA('bv'),
       price_expensive:    getA('exp'),
       price_too_expensive: getA('te'),
-
-      // Derived gap
       acceptable_range_width: +(getA('te') - getA('tc')).toFixed(2),
-
-      // Meta
       currency: 'USD',
       survey_version: '1.0',
     }
 
-    // Fire PostHog event
-    posthog.capture('vws_price_submitted', payload)
+    setSubmitting(true)
+    setSubmitError(null)
 
-    // Also identify the session with the mode chosen
-    posthog.capture('vws_mode_selected', {
-      pricing_mode: modeId,
-      pricing_tab:  tab.id,
-    })
+    try {
+      const url = import.meta.env.VITE_GOOGLE_SCRIPT_URL
+      await fetch(url, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
 
-    setSubmitted(true)
+      setSubmitted(true)
+    } catch (err) {
+      setSubmitError('提交失敗，請稍後再試。')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleReset = () => {
@@ -289,20 +292,11 @@ export default function App({ posthog }) {
     setModeId(id)
     setTabIdx(0)
     setSubmitted(false)
-    // Track funnel step
-    posthog.capture('vws_mode_selected', { pricing_mode: id })
   }
 
   const handleTabSelect = (i) => {
     setTabIdx(i)
     setSubmitted(false)
-    if (mode) {
-      posthog.capture('vws_tab_selected', {
-        pricing_mode: modeId,
-        pricing_tab: mode.tabs[i].id,
-        pricing_tab_name: mode.tabs[i].name,
-      })
-    }
   }
 
   const strictlyIncFilled = ORDER.filter((id, i, arr) =>
@@ -425,13 +419,14 @@ export default function App({ posthog }) {
                 </div>
 
                 <div className="vw-actions">
-                  <button className="vw-btn-primary" onClick={handleSubmit}>
-                    提交回答
+                  <button className="vw-btn-primary" onClick={handleSubmit} disabled={submitting}>
+                    {submitting ? '提交中...' : '提交回答'}
                   </button>
                   <button className="vw-btn-ghost" onClick={handleReset}>
                     重置
                   </button>
                 </div>
+                {submitError && <p style={{ color: '#d03f3f', fontSize: 13, marginTop: 12 }}>{submitError}</p>}
               </>
             ) : (
               /* Thank-you state */

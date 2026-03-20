@@ -30,20 +30,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Debug secret
-        run: |
-          if [ -n "$VITE_POSTHOG_KEY" ]; then
-            echo "✅ VITE_POSTHOG_KEY is set (length: ${#VITE_POSTHOG_KEY})"
-          else
-            echo "❌ VITE_POSTHOG_KEY is EMPTY"
-          fi
-        env:
-          VITE_POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
-
       - name: Build
         run: npm run build
         env:
-          VITE_POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
+          VITE_GOOGLE_SCRIPT_URL: ${{ secrets.GOOGLE_SCRIPT_URL }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
