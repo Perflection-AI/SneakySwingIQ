@@ -265,11 +265,14 @@ export default function App() {
 
     try {
       const url = import.meta.env.VITE_GOOGLE_SCRIPT_URL
+      const form = new FormData()
+      for (const [key, value] of Object.entries(payload)) {
+        form.append(key, value)
+      }
       await fetch(url, {
         method: 'POST',
-        redirect: 'follow',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload),
+        mode: 'no-cors',
+        body: form,
       })
 
       setSubmitted(true)

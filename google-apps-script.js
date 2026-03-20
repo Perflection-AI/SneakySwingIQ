@@ -52,22 +52,22 @@ function doPost(e) {
       headerRange.setFontWeight('bold')
     }
 
-    // Parse the incoming JSON body
-    const body = JSON.parse(e.postData.contents)
+    // Parse form data from e.parameter
+    const p = e.parameter
 
     // Append row
     sheet.appendRow([
       new Date().toISOString(),
-      body.pricing_mode,
-      body.pricing_tab,
-      body.pricing_tab_name,
-      body.price_too_cheap,
-      body.price_best_value,
-      body.price_expensive,
-      body.price_too_expensive,
-      body.acceptable_range_width,
-      body.currency,
-      body.survey_version,
+      p.pricing_mode,
+      p.pricing_tab,
+      p.pricing_tab_name,
+      p.price_too_cheap,
+      p.price_best_value,
+      p.price_expensive,
+      p.price_too_expensive,
+      p.acceptable_range_width,
+      p.currency,
+      p.survey_version,
     ])
 
     return ContentService
