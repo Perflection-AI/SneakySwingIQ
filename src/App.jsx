@@ -269,18 +269,18 @@ export default function App() {
       console.log('[DEBUG] Submitting to:', url)
       console.log('[DEBUG] Payload:', payload)
 
-      const form = new FormData()
+      const params = new URLSearchParams()
       for (const [key, value] of Object.entries(payload)) {
-        form.append(key, value)
+        params.append(key, value)
       }
 
       const res = await fetch(url, {
         method: 'POST',
-        mode: 'no-cors',
-        body: form,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
       })
-      console.log('[DEBUG] Response status:', res.status, res.statusText)
-      console.log('[DEBUG] Response type (no-cors = opaque):', res.type)
+      const result = await res.json()
+      console.log('[DEBUG] Response data:', result)
 
       setSubmitted(true)
     } catch (err) {
