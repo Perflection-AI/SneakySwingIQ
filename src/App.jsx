@@ -282,6 +282,10 @@ export default function App() {
       const result = await res.json()
       console.log('[DEBUG] Response data:', result)
 
+      if (result.status !== 'ok') {
+        throw new Error(result.message || '寫入失敗')
+      }
+
       setSubmitted(true)
     } catch (err) {
       console.error('[DEBUG] Submit error:', err)
